@@ -15,6 +15,7 @@ import { AirdropStep } from "./components/AirdropStep";
 import { Toaster } from "react-hot-toast";
 import { CreateMintStep } from "./components/CreateMintStep";
 import { IntroStep } from "./components/IntroStep";
+import { ProfileView } from "./components/ProfileView";
 
 const Admin = () => {
     const { client, createNewAirdrop } = useAirdrop();
@@ -68,15 +69,13 @@ const Content = () => {
 
     return (<main className="flex min-h-screen flex-col items-center justify-between pr-16">
         <div className="flex flex-col items-center justify-center">
-            <div className="flex justify-end items-end w-screen">
+            <div className="flex justify-end items-end w-screen items-center">
+                <ProfileView />
                 <WalletMultiButton />
             </div>
             <div className="flex flex-col items-center justify-center pb-4">
                 <img src={'/civic-logo-orange.svg'} className="pr-4 w-48 h-48"/>
                 <div className="text-2xl">Airdrop Demo</div>
-            </div>
-            <div className="flex flex-row items-center justify-center">
-                <img src={'/solana.svg'} className="pr-4 h-4"/>
             </div>
         </div>
         {ready ? <div className="flex flex-row md:flex-row w-screen md:w-2/3 items-center justify-center">

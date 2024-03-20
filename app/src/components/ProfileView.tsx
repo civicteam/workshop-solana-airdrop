@@ -14,13 +14,10 @@ export const ProfileView = () => {
 
   if (!profile) return <></>;
 
-  return <div style={{ paddingTop: "10px" }}>
-    <div>
-      <img width={100} src={profile.image?.url || user} alt="profile" style={{
-        borderRadius: "50%"
-      }} />
-    </div>
-    <h3>{profile.name?.value}</h3>
-    <a href={"https://civic.me/" + wallet?.publicKey}>View Profile</a>
+  return <div className="pr-5 flex flex-row justify-center items-center">
+    <div className="pr-5">{profile.name?.value}</div>
+    <a href={"https://civic.me/" + wallet?.publicKey} target="_blank">
+      <img src={profile.image?.url || user} alt="profile" className="w-12 h-12 rounded-full border-gray-400 border-2" />
+    </a>
   </div>;
 };
