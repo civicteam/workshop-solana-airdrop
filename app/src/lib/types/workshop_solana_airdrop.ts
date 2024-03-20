@@ -1,12 +1,12 @@
-export type WorkshopSolanaLottery = {
+export type WorkshopSolanaAirdrop = {
   "version": "0.1.0",
-  "name": "workshop_solana_lottery",
+  "name": "workshop_solana_airdrop",
   "instructions": [
     {
       "name": "initialize",
       "accounts": [
         {
-          "name": "lottery",
+          "name": "airdrop",
           "isMut": true,
           "isSigner": true
         },
@@ -28,21 +28,49 @@ export type WorkshopSolanaLottery = {
       ],
       "args": [
         {
+          "name": "mint",
+          "type": "publicKey"
+        },
+        {
           "name": "gatekeeperNetwork",
           "type": "publicKey"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     },
     {
-      "name": "enter",
+      "name": "claim",
       "accounts": [
         {
-          "name": "lottery",
+          "name": "airdrop",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "ticket",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recipientTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -52,8 +80,8 @@ export type WorkshopSolanaLottery = {
           "isSigner": false
         },
         {
-          "name": "applicant",
-          "isMut": true,
+          "name": "recipient",
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -62,44 +90,17 @@ export type WorkshopSolanaLottery = {
           "isSigner": false
         },
         {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "pickWinner",
-      "accounts": [
-        {
-          "name": "lottery",
-          "isMut": true,
-          "isSigner": false
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "withdraw",
-      "accounts": [
-        {
-          "name": "lottery",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "winner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "ticket",
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -109,7 +110,7 @@ export type WorkshopSolanaLottery = {
   ],
   "accounts": [
     {
-      "name": "lottery",
+      "name": "airdrop",
       "type": {
         "kind": "struct",
         "fields": [
@@ -122,13 +123,11 @@ export type WorkshopSolanaLottery = {
             "type": "publicKey"
           },
           {
-            "name": "winner",
-            "type": {
-              "option": "u64"
-            }
+            "name": "mint",
+            "type": "publicKey"
           },
           {
-            "name": "tickets",
+            "name": "amount",
             "type": "u64"
           }
         ]
@@ -138,26 +137,21 @@ export type WorkshopSolanaLottery = {
       "name": "ticket",
       "type": {
         "kind": "struct",
-        "fields": [
-          {
-            "name": "number",
-            "type": "u64"
-          }
-        ]
+        "fields": []
       }
     }
   ]
 };
 
-export const IDL: WorkshopSolanaLottery = {
+export const IDL: WorkshopSolanaAirdrop = {
   "version": "0.1.0",
-  "name": "workshop_solana_lottery",
+  "name": "workshop_solana_airdrop",
   "instructions": [
     {
       "name": "initialize",
       "accounts": [
         {
-          "name": "lottery",
+          "name": "airdrop",
           "isMut": true,
           "isSigner": true
         },
@@ -179,21 +173,49 @@ export const IDL: WorkshopSolanaLottery = {
       ],
       "args": [
         {
+          "name": "mint",
+          "type": "publicKey"
+        },
+        {
           "name": "gatekeeperNetwork",
           "type": "publicKey"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     },
     {
-      "name": "enter",
+      "name": "claim",
       "accounts": [
         {
-          "name": "lottery",
+          "name": "airdrop",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintAuthority",
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "ticket",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recipientTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -203,8 +225,8 @@ export const IDL: WorkshopSolanaLottery = {
           "isSigner": false
         },
         {
-          "name": "applicant",
-          "isMut": true,
+          "name": "recipient",
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -213,44 +235,17 @@ export const IDL: WorkshopSolanaLottery = {
           "isSigner": false
         },
         {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "pickWinner",
-      "accounts": [
-        {
-          "name": "lottery",
-          "isMut": true,
-          "isSigner": false
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "withdraw",
-      "accounts": [
-        {
-          "name": "lottery",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "winner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "ticket",
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -260,7 +255,7 @@ export const IDL: WorkshopSolanaLottery = {
   ],
   "accounts": [
     {
-      "name": "lottery",
+      "name": "airdrop",
       "type": {
         "kind": "struct",
         "fields": [
@@ -273,13 +268,11 @@ export const IDL: WorkshopSolanaLottery = {
             "type": "publicKey"
           },
           {
-            "name": "winner",
-            "type": {
-              "option": "u64"
-            }
+            "name": "mint",
+            "type": "publicKey"
           },
           {
-            "name": "tickets",
+            "name": "amount",
             "type": "u64"
           }
         ]
@@ -289,12 +282,7 @@ export const IDL: WorkshopSolanaLottery = {
       "name": "ticket",
       "type": {
         "kind": "struct",
-        "fields": [
-          {
-            "name": "number",
-            "type": "u64"
-          }
-        ]
+        "fields": []
       }
     }
   ]

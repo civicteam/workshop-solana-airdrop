@@ -1,80 +1,35 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import "./App.css";
-import user from "./user.jpg"
-import {
-  ConnectionProvider,
-  useAnchorWallet,
-  useConnection,
-  useWallet,
-  WalletProvider
-} from "@solana/wallet-adapter-react"
-import {
-    WalletModalProvider,
-    WalletMultiButton
-} from "@solana/wallet-adapter-react-ui";
-import { LotteryProvider, useLottery } from "./LotteryContext";
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { ConnectionProvider, useWallet, WalletProvider } from "@solana/wallet-adapter-react";
+import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { AirdropProvider, useAirdrop } from "./AirdropContext";
+import { clusterApiUrl } from "@solana/web3.js";
 import { CivicPassProvider } from "./CivicPassContext";
 import { GatewayStatus, IdentityButton, useGateway } from "@civic/solana-gateway-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { CivicProfile, Profile } from "@civic/profile";
 
-import '@solana/wallet-adapter-react-ui/styles.css';
-
-const mainnetConnection = new Connection("https://solana-mainnet.rpc.extrnode.com");
+import "@solana/wallet-adapter-react-ui/styles.css";
+import { Step } from "./components/Step";
+import { FaChevronRight } from "react-icons/fa6";
+import { AirdropStep } from "./components/AirdropStep";
+import { Toaster } from "react-hot-toast";
+import { CreateMintStep } from "./components/CreateMintStep";
+import { IntroStep } from "./components/IntroStep";
 
 const Admin = () => {
-    const { client, createNewLottery } = useLottery();
-    const { connection } = useConnection();
-    const [pot, setPot] = React.useState(0);
-    useEffect(() => {
-        if (client) {
-            connection.getBalance(client.lotteryAddress).then(setPot);
-            connection.onAccountChange(client.lotteryAddress, (account) => {
-                setPot(account.lamports);
-            });
-        }
-    }, [client, connection]);
+    const { client, createNewAirdrop } = useAirdrop();
 
     return (<div>
         <h1>Admin Mode</h1>
-        { !client && <button onClick={createNewLottery}>Create New Lottery</button>}
+        { !client && <button onClick={createNewAirdrop}>Create New Airdrop</button>}
         { client && <>
-            <div><a href={ `${document.location.href}#${client.lotteryAddress.toString()}`}>Your Lottery</a></div>
-            <div><>Total tickets: {client.lottery.tickets.toString()}</></div>
-            <div><>Total pot: {pot}</></div>
-            <button onClick={() => client.deposit(LAMPORTS_PER_SOL)}>Deposit 1 SOL</button>
-            { client.lottery.winner === null && <button onClick={() => client.pickWinner()}>Pick Winner</button>}
-            { client.lottery.winner && <p><>Winning ticket: {client.lottery.winner.toString()}</></p>}
+            <div><a href={ `${document.location.href}#${client.airdropAddress.toString()}`}>Your Airdrop</a></div>
         </>}
     </div>)
 }
 
-const ProfileView = () => {
-    const wallet = useAnchorWallet();
-    const [profile, setProfile] = useState<Profile>();
-    useEffect(() => {
-        if (!wallet) return;
-        CivicProfile.get(wallet.publicKey.toString(), {
-            solana: { connection: mainnetConnection },
-        }).then(setProfile);
-    }, [wallet]);
-
-    if (!profile) return <></>
-
-    return <div style={{ paddingTop: "10px" }}>
-        <div>
-            <img width={100} src={profile.image?.url || user} alt="profile" style={{
-                borderRadius: "50%",
-            }}/>
-        </div>
-        <h3>{profile.name?.value}</h3>
-        <a href={"https://civic.me/" + wallet?.publicKey}>View Profile</a>
-    </div>;
-}
-
 const Player = () => {
-    const { client } = useLottery();
+    const { client } = useAirdrop();
     const { gatewayStatus, gatewayToken } = useGateway();
     if (!client) return <></>;
 
@@ -82,53 +37,94 @@ const Player = () => {
         <h1>Player Mode</h1>
         <IdentityButton />
         { gatewayStatus !== GatewayStatus.ACTIVE && <div>Verify you are a unique person before entering</div>}
-        { !client.ticket && gatewayToken && <button disabled={gatewayStatus !== GatewayStatus.ACTIVE} onClick={() => client.enter(gatewayToken.publicKey)}>Enter Lottery</button>}
-        { client.ticket && <p><>Your ticket: {client.ticket.number.toString()}</></p>}
-        { client.lottery.winner && <p><>Winning ticket: {client.lottery.winner.toString()}</></p>}
-        { client.ticket && client.lottery.winner?.toNumber() === client.ticket?.number.toNumber() && <div>
-            <div>You won!</div>
-            <button onClick={() => client.withdraw()}>Claim your winnings</button>
-        </div>}
+        { !client.ticket && gatewayToken && <button disabled={gatewayStatus !== GatewayStatus.ACTIVE} onClick={() => client.claim(gatewayToken.publicKey)}>Claim Airdrop</button>}
     </div>)
 }
 
-const Dashboard = () => {
+const SecondStep = () => {
     const wallet = useWallet()
-    const { client } = useLottery();
+    const { client } = useAirdrop();
 
     if (!wallet.connected || !wallet.publicKey) return <></>
 
-    // admin mode if we have not created a lottery yet, or if we are the lottery authority
-    const isAdminMode = client === undefined || client.lottery.authority.equals(wallet.publicKey);
+    // admin mode if we have not created a airdrop yet, or if we are the airdrop authority
+    const isAdminMode = client === undefined || client.airdrop.authority.equals(wallet.publicKey);
 
-    return isAdminMode ? <Admin /> : <Player />;
+    return isAdminMode ? (<Step title="Create Mint" description="">
+        <CreateMintStep />
+    </Step>) : (<Step title="Airdrop" description="">
+        <AirdropStep />
+    </Step>);
 }
 
-const Content = () =>
-  <header className="App-header">
-      <WalletMultiButton />
-      <ProfileView/>
-      <Dashboard />
-  </header>
+const Content = () => {
+    const wallet = useWallet()
+    const { client } = useAirdrop();
+
+    const ready = wallet.connected && wallet.publicKey
+
+    // admin mode if we have not created a airdrop yet, or if we are the airdrop authority
+    const isAdminMode = ready && (client === undefined || (wallet.publicKey && client.airdrop.authority.equals(wallet.publicKey)));
+
+    return (<main className="flex min-h-screen flex-col items-center justify-between pr-16">
+        <div className="flex flex-col items-center justify-center">
+            <div className="flex justify-end items-end w-screen">
+                <WalletMultiButton />
+            </div>
+            <div className="flex flex-col items-center justify-center pb-4">
+                <img src={'/civic-logo-orange.svg'} className="pr-4 w-48 h-48"/>
+                <div className="text-2xl">Airdrop Demo</div>
+            </div>
+            <div className="flex flex-row items-center justify-center">
+                <img src={'/solana.svg'} className="pr-4 h-4"/>
+            </div>
+        </div>
+        {ready ? <div className="flex flex-row md:flex-row w-screen md:w-2/3 items-center justify-center">
+            {!isAdminMode && <>
+                <Step title="Civic Pass" description="">
+                    <IdentityButton />
+                </Step>
+                <FaChevronRight className="text-4xl" />
+            </>}
+            {
+                isAdminMode ? (<Step title="Create Mint" description="">
+                    <CreateMintStep />
+                </Step>) : (<Step title="Airdrop" description="">
+                    <AirdropStep />
+                </Step>)
+            }
+        </div> : <div><IntroStep/></div>
+        }
+        <div className="flex justify-end items-end w-screen">
+            Created by <a className="pl-1 pr-1" href="https://www.linkedin.com/in/kelleherdaniel/">Daniel Kelleher</a> ©
+            2024 Civic Technologies, Inc.
+        </div>
+    </main>)
+}
 
 function App() {
     const network = WalletAdapterNetwork.Devnet;
     const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
     return (
-        <div className="App">
-            <ConnectionProvider endpoint={endpoint}>
-                <WalletProvider wallets={[]} autoConnect>
-                    <WalletModalProvider>
-                        <CivicPassProvider>
-                            <LotteryProvider>
-                                <Content />
-                            </LotteryProvider>
-                        </CivicPassProvider>
-                    </WalletModalProvider>
-                </WalletProvider>
-            </ConnectionProvider>
-        </div>
+      <main className="flex min-h-screen flex-col items-center justify-between p-4">
+          <Toaster
+            position="bottom-right"
+            toastOptions={{ duration: 5000 }}
+            reverseOrder={false}
+          />
+          <ConnectionProvider endpoint={endpoint}>
+              <WalletProvider wallets={[]} autoConnect>
+                  <WalletModalProvider>
+                      <CivicPassProvider>
+                          <AirdropProvider>
+                              <Content />
+                          </AirdropProvider>
+                      </CivicPassProvider>
+                  </WalletModalProvider>
+              </WalletProvider>
+          </ConnectionProvider>
+      </main>
     );
 }
 
