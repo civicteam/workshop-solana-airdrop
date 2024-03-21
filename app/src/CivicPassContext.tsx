@@ -7,10 +7,6 @@ export const CivicPassProvider: FC<PropsWithChildren> = ({ children }) => {
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
 
-  if (!wallet) {
-    return <>{children}</>;
-  }
-
   return <GatewayProvider
     wallet={wallet}
     connection={connection}
