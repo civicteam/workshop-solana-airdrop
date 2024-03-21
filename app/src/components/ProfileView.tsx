@@ -2,8 +2,6 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
 import { CivicProfile, Profile } from "@civic/profile";
 import user from "../user.jpg";
-import { Connection } from "@solana/web3.js";
-import GaugeComponent from "react-gauge-component";
 import { ScoreView } from "./ScoreView";
 
 export const ProfileView = () => {
